@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>居家剩食平台</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Segoe UI", sans-serif;
+    }
+
+    body {
+      background: linear-gradient(to bottom right, #f5f7f2, #eef5eb);
+      color: #222;
+      min-height: 100vh;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    header {
+      background: white;
+      padding: 18px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .logo {
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    nav {
+      display: flex;
+      gap: 12px;
+    }
+
+    button {
+      border: none;
+      border-radius: 12px;
+      padding: 12px 18px;
+      cursor: pointer;
+      transition: 0.3s;
+      font-weight: 600;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      opacity: 0.9;
+    }
+
+    .primary-btn {
+      background: #2e7d32;
+      color: white;
+    }
+
+    .secondary-btn {
+      background: white;
+      border: 1px solid #ddd;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: auto;
+      padding: 30px 20px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 24px;
+      padding: 24px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+      margin-bottom: 24px;
+    }
+
+    .login-wrapper {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .login-card {
+      width: 100%;
+      max-width: 420px;
+      background: white;
+      padding: 40px;
+      border-radius: 30px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+    }
+
+    .login-card h1 {
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    .login-card p {
+      text-align: center;
+      color: #666;
+      margin-bottom: 30px;
+    }
+
+    input {
+      width: 100%;
+      padding: 14px;
+      border-radius: 12px;
+      border: 1px solid #ddd;
+      margin-bottom: 14px;
+      outline: none;
+    }
+
+    .social-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .main-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 24px;
+    }
+
+    .recipe-tags {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 15px;
+      margin-bottom: 20px;
+    }
+
+    .tag {
+      background: #eef5eb;
+      color: #2e7d32;
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-size: 14px;
+    }
+
+    .steps {
+      margin-top: 20px;
+    }
+
+    .step {
+      background: #fafafa;
+      border: 1px solid #eee;
+      border-radius: 14px;
+      padding: 14px;
+      margin-bottom: 12px;
+    }
+
+    .history-item {
+      border: 1px solid #eee;
+      border-radius: 20px;
+      padding: 16px;
+      margin-bottom: 16px;
+      transition: 0.3s;
+      cursor: pointer;
+    }
+
+    .history-item:hover {
+      transform: scale(1.02);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+    }
+
+    .difficulty {
+      color: #2e7d32;
+      font-weight: bold;
+      margin-top: 6px;
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      backdrop-filter: blur(4px);
+    }
+
+    .modal-content {
+      background: white;
+      width: 100%;
+      max-width: 700px;
+      border-radius: 30px;
+      padding: 30px;
+      animation: fadeIn 0.3s ease;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .loading {
+      text-align: center;
+      padding: 30px;
+      color: #2e7d32;
+      font-weight: bold;
+      animation: pulse 1s infinite;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 0.4; }
+      50% { opacity: 1; }
+      100% { opacity: 0.4; }
+    }
+
+    footer {
+      text-align: center;
+      padding: 30px;
+      color: #666;
+    }
+
+    @media(max-width: 900px) {
+      .main-grid {
+        grid-template-columns: 1fr;
+      }
+
+      header {
+        flex-direction: column;
+        gap: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div id="loginPage" class="login-wrapper">
+  <div class="login-card">
+    <h1>🥗 居家剩食平台</h1>
+    <p>AI 智慧料理推薦系統</p>
+
+    <input type="email" id="email" placeholder="輸入 Email" />
+    <input type="password" id="password" placeholder="輸入密碼" />
+
+    <button class="primary-btn" style="width:100%;" onclick="login()">登入 / 註冊</button>
+
+    <div class="social-buttons">
+      <button class="secondary-btn" onclick="socialLogin('Google')">使用 Google 登入</button>
+      <button class="secondary-btn" onclick="socialLogin('Apple')">使用 Apple 登入</button>
+    </div>
+  </div>
+</div>
+
+<div id="app" class="hidden">
+  <header>
+    <div>
+      <div class="logo">🥘 居家剩食平台</div>
+      <small>AI 智慧剩食料理推薦</small>
+    </div>
+
+    <nav>
+      <button class="secondary-btn" onclick="showHome()">首頁</button>
+      <button class="secondary-btn" onclick="showAccount()">帳號管理</button>
+      <button class="primary-btn" onclick="logout()">登出</button>
+    </nav>
+  </header>
+
+  <div class="container">
+
+    <div id="homePage">
+      <div class="main-grid">
+
+        <div>
+          <div class="card">
+            <h2>輸入剩餘食材</h2>
+            <br />
+
+            <input type="text" id="ingredientInput" placeholder="例如：雞蛋、起司、韓式泡菜、午餐肉" />
+
+            <button class="primary-btn" onclick="recommendRecipe()">AI 推薦料理</button>
+          </div>
+
+          <div class="card" id="loadingBox" style="display:none;">
+            <div class="loading">AI 正在分析最佳料理...</div>
+          </div>
+
+          <div class="card hidden" id="recipeCard">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap;">
+              <div>
+                <h2 id="recipeName"></h2>
+                <div class="difficulty" id="recipeDifficulty"></div>
+              </div>
+
+              <div class="tag" id="recipeMatch"></div>
+            </div>
+
+            <div class="recipe-tags" id="recipeIngredients"></div>
+
+            <p id="recipeDescription"></p>
+
+            <div class="steps" id="recipeSteps"></div>
+
+            <div style="display:flex;gap:12px;margin-top:24px;flex-wrap:wrap;">
+              <button class="secondary-btn" onclick="nextRecipe()">換一道料理</button>
+              <button class="primary-btn" onclick="saveRecipe()">收藏料理</button>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="card">
+            <h2>歷史紀錄</h2>
+            <br />
+
+            <div id="historyList"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="accountPage" class="hidden">
+      <div class="card">
+        <h2>帳號管理</h2>
+        <br />
+
+        <p><strong>Email：</strong><span id="userEmail"></span></p>
+        <br />
+
+        <div class="history-item">
+          <strong>Google 帳號</strong>
+          <p>已連動 Google 登入</p>
+        </div>
+
+        <div class="history-item">
+          <strong>Apple 帳號</strong>
+          <p>已連動 Apple 登入</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>歷史紀錄管理</h2>
+        <br />
+
+        <div id="manageHistory"></div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    © 2026 居家剩食平台 - AI 剩食料理推薦系統
+  </footer>
+</div>
+
+<div class="modal hidden" id="modal">
+  <div class="modal-content">
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <h2 id="modalTitle"></h2>
+      <button class="secondary-btn" onclick="closeModal()">關閉</button>
+    </div>
+
+    <br />
+
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<script>
+  const recipes = [
+    {
+      name: "韓式部隊鍋",
+      difficulty: 2,
+      match: "高符合",
+      ingredients: ["雞蛋", "起司", "韓式泡菜", "午餐肉"],
+      description: "此料理與您輸入食材匹配度高，且製作難度較低。",
+      steps: [
+        "將泡菜與高湯煮滾",
+        "加入午餐肉與其他配料",
+        "放入起司與雞蛋後煮熟即可"
+      ]
+    },
+    {
+      name: "泡菜炒飯",
+      difficulty: 1,
+      match: "高符合",
+      ingredients: ["韓式泡菜", "雞蛋", "白飯"],
+      description: "適合快速料理，食材簡單又方便。",
+      steps: [
+        "熱鍋炒蛋",
+        "加入泡菜與白飯拌炒",
+        "調味後即可完成"
+      ]
+    },
+    {
+      name: "起司歐姆蛋",
+      difficulty: 1,
+      match: "中符合",
+      ingredients: ["雞蛋", "起司"],
+      description: "簡單快速，適合早餐與點心。",
+      steps: [
+        "將雞蛋打散",
+        "煎至半熟加入起司",
+        "對折即可完成"
+      ]
+    },
+    {
+      name: "奶油培根義大利麵",
+      difficulty: 2,
+      match: "高符合",
+      ingredients: ["義大利麵", "培根", "奶油", "牛奶"],
+      description: "濃郁奶香搭配培根風味。",
+      steps: ["煮熟義大利麵", "炒香培根", "加入奶油牛奶拌炒即可"]
+    },
+    {
+      name: "草莓鬆餅",
+      difficulty: 1,
+      match: "中符合",
+      ingredients: ["草莓", "雞蛋", "牛奶", "麵粉"],
+      description: "甜而不膩的下午茶甜點。",
+      steps: ["混合麵糊", "煎成鬆餅", "放上草莓即可"]
+    },
+    {
+      name: "巧克力布朗尼",
+      difficulty: 2,
+      match: "高符合",
+      ingredients: ["巧克力", "奶油", "雞蛋", "麵粉"],
+      description: "濃厚巧克力香氣甜點。",
+      steps: ["融化巧克力", "混合材料", "放入烤箱烘烤"]
+    },
+    {
+      name: "香蕉牛奶冰沙",
+      difficulty: 1,
+      match: "中符合",
+      ingredients: ["香蕉", "牛奶", "冰塊"],
+      description: "快速完成的清爽飲品。",
+      steps: ["放入果汁機", "攪打均勻", "倒入杯中即可"]
+    },
+    {
+      name: "番茄炒蛋",
+      difficulty: 1,
+      match: "高符合",
+      ingredients: ["番茄", "雞蛋"],
+      description: "家常經典快速料理。",
+      steps: ["炒蛋備用", "炒番茄", "混合調味即可"]
+    },
+    {
+      name: "咖哩雞肉飯",
+      difficulty: 2,
+      match: "高符合",
+      ingredients: ["雞肉", "馬鈴薯", "紅蘿蔔", "咖哩塊"],
+      description: "香濃咖哩風味料理。",
+      steps: ["炒雞肉", "加入蔬菜燉煮", "放入咖哩塊"]
+    },
+    {
+      name: "鮪魚玉米吐司",
+      difficulty: 1,
+      match: "中符合",
+      ingredients: ["鮪魚", "玉米", "吐司"],
+      description: "快速早餐首選。",
+      steps: ["混合鮪魚玉米", "塗抹吐司", "放入烤箱"]
+    },
+    {
+      name: "抹茶拿鐵",
+      difficulty: 1,
+      match: "中符合",
+      ingredients: ["抹茶粉", "牛奶", "糖"],
+      description: "日式風味飲品。",
+      steps: ["攪拌抹茶粉", "加入熱牛奶", "完成即可"]
+    },
+    {
+      name: "蜂蜜厚片",
+      difficulty: 1,
+      match: "低符合",
+      ingredients: ["吐司", "蜂蜜", "奶油"],
+      description: "香甜簡單點心。",
+      steps: ["烤吐司", "塗奶油", "淋上蜂蜜"]
+    },
+    {
+      name: "奶酪布丁",
+      difficulty: 2,
+      match: "中符合",
+      ingredients: ["牛奶", "鮮奶油", "吉利丁", "糖"],
+      description: "滑順香甜甜品。",
+      steps: ["加熱牛奶", "加入吉利丁", "冷藏凝固"]
+    },
+    {
+      name: "蒜香奶油蝦",
+      difficulty: 2,
+      match: "高符合",
+      ingredients: ["蝦子", "蒜頭", "奶油"],
+      description: "濃郁蒜香海鮮料理。",
+      steps: ["爆香蒜頭", "加入蝦子", "奶油調味即可"]
+    },
+    {
+      name: "水果優格杯",
+      difficulty: 1,
+      match: "低符合",
+      ingredients: ["優格", "水果", "麥片"],
+      description: "健康低負擔甜點。",
+      steps: ["放入優格", "加入水果", "撒上麥片"]
+    },
+    ...Array.from({ length: 85 }, (_, i) => ({
+      name: `創意料理 ${i + 1}`,
+      difficulty: Math.floor(Math.random() * 5) + 1,
+      match: ["高符合", "中符合", "低符合"][Math.floor(Math.random() * 3)],
+      ingredients: [
+        ["雞蛋", "起司", "牛奶"],
+        ["番茄", "洋蔥", "雞肉"],
+        ["巧克力", "奶油", "麵粉"],
+        ["草莓", "鮮奶油", "糖"],
+        ["白飯", "火腿", "玉米"]
+      ][Math.floor(Math.random() * 5)],
+      description: "AI 根據剩餘食材推薦的創意料理。",
+      steps: [
+        "準備所有食材",
+        "依序進行烹飪",
+        "調味後即可享用"
+      ]
+    }))
+  ];
+
+  let currentRecipes = [];
+  let currentIndex = 0;
+
+  function login() {
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+
+    if (!email || !password) {
+      alert('請輸入 Email 與密碼');
+      return;
+    }
+
+    localStorage.setItem('user', JSON.stringify({ email, password }));
+
+    document.getElementById('loginPage').classList.add('hidden');
+    document.getElementById('app').classList.remove('hidden');
+
+    document.getElementById('userEmail').textContent = email;
+
+    loadHistory();
+  }
+
+  function socialLogin(provider) {
+    localStorage.setItem('user', JSON.stringify({
+      email: provider + '@demo.com'
+    }));
+
+    document.getElementById('loginPage').classList.add('hidden');
+    document.getElementById('app').classList.remove('hidden');
+
+    document.getElementById('userEmail').textContent = provider + '@demo.com';
+
+    loadHistory();
+  }
+
+  function logout() {
+    document.getElementById('app').classList.add('hidden');
+    document.getElementById('loginPage').classList.remove('hidden');
+  }
+
+  function recommendRecipe() {
+    const input = document.getElementById('ingredientInput').value;
+
+    if (!input) {
+      alert('請輸入食材');
+      return;
+    }
+
+    const ingredients = input
+      .split(/[、,]/)
+      .map(i => i.trim())
+      .filter(i => i);
+
+    document.getElementById('loadingBox').style.display = 'block';
+    document.getElementById('recipeCard').classList.add('hidden');
+
+    setTimeout(() => {
+      currentRecipes = recipes
+        .map(recipe => {
+          const matchedIngredients = recipe.ingredients.filter(i =>
+            ingredients.includes(i)
+          );
+
+          const matchCount = matchedIngredients.length;
+
+          return {
+            ...recipe,
+            score: matchCount,
+            matchedIngredients
+          };
+        })
+        .filter(recipe => recipe.score > 0)
+        .sort((a, b) => {
+          if (b.score !== a.score) {
+            return b.score - a.score;
+          }
+
+          return a.difficulty - b.difficulty;
+        });
+
+      if (currentRecipes.length === 0) {
+        document.getElementById('loadingBox').style.display = 'none';
+
+        alert('找不到符合食材的料理，請嘗試輸入其他食材');
+        return;
+      }
+
+      currentIndex = 0;
+
+      renderRecipe();
+
+      document.getElementById('loadingBox').style.display = 'none';
+      document.getElementById('recipeCard').classList.remove('hidden');
+    }, 1500);
+  }
+
+  function renderRecipe() {
+    const recipe = currentRecipes[currentIndex];
+
+    document.getElementById('recipeName').textContent = recipe.name;
+    document.getElementById('recipeDifficulty').textContent = `烹飪難度：${recipe.difficulty}/5`;
+    document.getElementById('recipeMatch').textContent = recipe.match;
+    document.getElementById('recipeDescription').textContent = `AI 根據您輸入的食材：${recipe.matchedIngredients.join('、')}，推薦這道料理。${recipe.description}`;
+
+    document.getElementById('recipeIngredients').innerHTML = recipe.ingredients
+      .map(i => `<div class="tag">${i}</div>`)
+      .join('');
+
+    document.getElementById('recipeSteps').innerHTML = recipe.steps
+      .map((step, index) => `<div class="step">${index + 1}. ${step}</div>`)
+      .join('');
+  }
+
+  function nextRecipe() {
+    currentIndex++;
+
+    if (currentIndex >= currentRecipes.length) {
+      currentIndex = 0;
+    }
+
+    renderRecipe();
+  }
+
+  function saveRecipe() {
+    const recipe = currentRecipes[currentIndex];
+
+    let history = JSON.parse(localStorage.getItem('history')) || [];
+
+    history.unshift({
+      ...recipe,
+      time: new Date().toLocaleString()
+    });
+
+    localStorage.setItem('history', JSON.stringify(history));
+
+    loadHistory();
+
+    alert('已收藏料理');
+  }
+
+  function loadHistory() {
+    const history = JSON.parse(localStorage.getItem('history')) || [];
+
+    const historyHTML = history.map((item, index) => `
+      <div class="history-item" onclick="openRecipe(${index})">
+        <div style="display:flex;justify-content:space-between;gap:10px;">
+          <div>
+            <strong>${item.name}</strong>
+            <div class="difficulty">難度 ${item.difficulty}/5</div>
+            <small>${item.time}</small>
+          </div>
+
+          <button class="secondary-btn" onclick="deleteHistory(event, ${index})">刪除</button>
+        </div>
+      </div>
+    `).join('');
+
+    document.getElementById('historyList').innerHTML = historyHTML || '<p>尚未收藏料理</p>';
+    document.getElementById('manageHistory').innerHTML = historyHTML || '<p>尚未收藏料理</p>';
+  }
+
+  function deleteHistory(event, index) {
+    event.stopPropagation();
+
+    let history = JSON.parse(localStorage.getItem('history')) || [];
+
+    history.splice(index, 1);
+
+    localStorage.setItem('history', JSON.stringify(history));
+
+    loadHistory();
+  }
+
+  function openRecipe(index) {
+    const history = JSON.parse(localStorage.getItem('history')) || [];
+
+    const item = history[index];
+
+    document.getElementById('modal').classList.remove('hidden');
+
+    document.getElementById('modalTitle').textContent = item.name;
+
+    document.getElementById('modalContent').innerHTML = `
+      <p><strong>烹飪難度：</strong>${item.difficulty}/5</p>
+      <br>
+
+      <p><strong>食材符合度：</strong>${item.match}</p>
+      <br>
+
+      <p><strong>所需食材：</strong></p>
+      <div class="recipe-tags">
+        ${item.ingredients.map(i => `<div class="tag">${i}</div>`).join('')}
+      </div>
+
+      <br>
+
+      <p><strong>料理步驟：</strong></p>
+      ${item.steps.map((step, idx) => `
+        <div class="step">${idx + 1}. ${step}</div>
+      `).join('')}
+    `;
+  }
+
+  function closeModal() {
+    document.getElementById('modal').classList.add('hidden');
+  }
+
+  function showHome() {
+    document.getElementById('homePage').classList.remove('hidden');
+    document.getElementById('accountPage').classList.add('hidden');
+  }
+
+  function showAccount() {
+    document.getElementById('homePage').classList.add('hidden');
+    document.getElementById('accountPage').classList.remove('hidden');
+  }
+
+  window.onload = () => {
+    const user = JSON.parse(localStorage.getItem('user'));
+
+    if (user) {
+      document.getElementById('loginPage').classList.add('hidden');
+      document.getElementById('app').classList.remove('hidden');
+
+      document.getElementById('userEmail').textContent = user.email;
+
+      loadHistory();
+    }
+  }
+</script>
+
+</body>
+</html>
